@@ -10,17 +10,12 @@ int get_size_from_n(int s){
 
 
 int main(){
-	Slab *slab = malloc(sizeof(Slab));
+	
 	int n = 0;
 	n=n+4;
 	int size = get_size_from_n(n); //correspondra a une grille de taille 16
 
-	
-	float* grid = create_grid(size,size);
-	slab->grid = grid;
-	slab->size = size;
-	slab->n = n;
-	slab->base_value = 256.0;
+	Slab *slab = create_Slab(size,n,256.0);
 
 	set_values_center(slab);
 

@@ -12,6 +12,7 @@ struct Slab{
 };
 
 
+Slab* create_Slab(int size,int n,int base_value);
 
 void print_Slab(Slab* s);
 

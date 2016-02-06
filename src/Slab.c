@@ -5,6 +5,17 @@
 #include "Slab.h"
 #include "Grid.h"
 
+
+Slab* create_Slab(int size,int n,int base_value){
+	Slab *slab = malloc(sizeof(Slab));
+	float* grid = create_grid(size,size);
+	slab->grid = grid;
+	slab->size = size;
+	slab->n = n;
+	slab->base_value = base_value;
+	return slab;
+}
+
 void print_Slab(Slab* s) {
 	print_grid(s->grid,s->size,s->size);
 }
