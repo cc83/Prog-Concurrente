@@ -14,13 +14,15 @@ struct Slab{
 
 Slab* create_Slab(int size,int n,int base_value);
 
+void destroy_Slab(Slab* s);
+
 void print_Slab(Slab* s);
 
 void set_values_center(Slab* m);
 
-void h_transfert(Slab* s,int l,int c,float* new_grid);
+void h_transfert(int l,int c,int size,float* prev_grid,float* new_grid);
 
-void v_transfert(Slab* s,int l,int c,float* new_grid);
+void v_transfert(int l,int c,int size,float* prev_grid,float* new_grid);
 
 void do_step_iterative(Slab* s,float* grid);
 

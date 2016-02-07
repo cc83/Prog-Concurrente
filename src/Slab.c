@@ -16,6 +16,13 @@ Slab* create_Slab(int size,int n,int base_value){
 	return slab;
 }
 
+
+void destroy_Slab(Slab* s){
+	free(s->grid);
+	free(s);
+}
+
+
 void print_Slab(Slab* s) {
 	print_grid(s->grid,s->size,s->size);
 }
@@ -36,36 +43,37 @@ void set_values_center(Slab* m){
 }
 
 
-void destroy_Slab(Slab* m){
-	free(m->grid);
-}
 
 
 
+/*
+	Realise l'echange de chaleur horizontal de la case de ligne l et de 
+	colonne c situee dans prev_grid. Stocke le resultat dans new_grid.
+*/
+void h_transfert(int l,int c,int size,float* prev_grid,float* new_grid){
 
-void h_transfert(Slab* s,int l, int c,float* new_grid){
-	int size = s->size;
+	new_grid[l*size+c] += prev_grid[l*size+c] * (4.0/6.0); 
 
-	new_grid[l*size+c] += s->grid[l*size+c] * (4.0/6.0); 
-
+	//On verifie qu'on est toujours sur la meme ligne lorsqu'on augmente de 1 le numero de la colonne
 	if ((l*size+c+1)/size == l)
-		new_grid[l*size+c+1] += s->grid[l*size+c]/6.0;
+		new_grid[l*size+c+1] += prev_grid[l*size+c]/6.0;
 
-	if ((l*size+c-1)/size == l)
-		new_grid[l*size+c-1] += s->grid[l*size+c]/6.0;
+	//On verifie qu'on est toujours sur la meme ligne et qu'on n'est pas au premier element 
+	// lorsqu'on diminue de 1 le numero de la colonne
+	if ( (l*size+c-1)>0 && (l*size+c-1)/size == l )
+		new_grid[l*size+c-1] += prev_grid[l*size+c]/6.0;
 
 }
 
-void v_transfert(Slab* s,int l, int c,float* new_grid){
-	int size = s->size;
-
-	new_grid[l*size+c] += s->grid[l*size+c] * (4.0/6.0); 
+void v_transfert(int l,int c,int size,float* prev_grid,float* new_grid){
+	
+	new_grid[l*size+c] += prev_grid[l*size+c] * (4.0/6.0); 
 
 	if (l-1 >=0)
-		new_grid[(l-1)*size+c] += s->grid[l*size+c]/6.0;
+		new_grid[(l-1)*size+c] += prev_grid[l*size+c]/6.0;
 
-	if (l+1 < s->size)
-		new_grid[(l+1)*size+c] += s->grid[l*size+c]/6.0;
+	if (l+1 < size)
+		new_grid[(l+1)*size+c] += prev_grid[l*size+c]/6.0;
 
 
 }
@@ -76,21 +84,19 @@ void do_step_iterative(Slab* s,float* grid){
 
 	for (int i =0;i<size;i++) {
 		for (int j =0;j<size;j++) {
-			h_transfert(s,i,j,grid);
+			h_transfert(i,j,size,s->grid,grid);
 		}
 	}
 
-	memcpy(s->grid,grid,sizeof(float)*size*size);
 
-	clear_grid(grid,size);
+	clear_grid(s->grid,size);
 
 	for (int i =0;i<size;i++) {
 		for (int j =0;j<size;j++) {
-			v_transfert(s,i,j,grid);
+			v_transfert(i,j,size,grid,s->grid);
 		}
 	}
 
-	memcpy(s->grid,grid,sizeof(float)*size*size);
 
 	clear_grid(grid,size);
 
