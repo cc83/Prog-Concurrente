@@ -104,3 +104,14 @@ void do_step_iterative(Slab* s,float* grid){
 
 }
 
+void do_N_steps_iterative(Slab* s,int n) {
+
+	float* new_grid = create_grid(s->size,s->size);
+
+	for (int i = 0;i<n;i++) {
+		do_step_iterative(s,new_grid);
+	}
+
+	free(new_grid);
+
+}
