@@ -50,6 +50,10 @@ int main(){
 	s+=4;
 	int size = get_size_from_n(s); //correspondra a une grille de taille 16 si s=0
 
+
+	printf("/********** Program launched   ************/\n");
+
+
 	Slab *slab = create_Slab(size,s,256.0);
 	set_values_center(slab);
 
@@ -129,6 +133,6 @@ int main(){
 	destroy_Slab(slab);
 	
 	
-
+	printf("/********** Program finished   ************/\n");
 
 }
