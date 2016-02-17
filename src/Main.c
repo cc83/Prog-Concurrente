@@ -10,37 +10,117 @@ int get_size_from_n(int s){
 	return 1 << s;
 }
 
+void remove_extreme_values(double* tab,int size) {
+	int min_i=0;
+ 	int max_i=0;
+ 	for (int i=0; i<size; i++) {
+	      if(tab[i]>tab[max_i]) max_i = i;
+	      if(tab[i]<tab[min_i]) min_i = i;
+    }
+    
+    int j = 0;
+    for (int i=0; i<size; i++) 
+	      if(i != max_i && i != min_i) tab[j++] = tab[i];
+	      
+    tab = realloc(tab,sizeof(double)*(size-2));
+
+}
+
+void compute_median_value(double* tab,int size,double* val){
+	double a = 0;
+	for (int i = 0;i< size;i++) 
+		a+= (double) tab[i];
+	*val = (double) a/size;
+}
 
 int main(){
 	
-	int n = 0;
+	//options du programme
+	int s = 0;
+	short m = 1;
+	short M = 1;
+	short a = 1;
+	int i = 1000;
+	short e = 0;
+	int t = 0;
 
-	clock_t start_t_cpu, end_t_cpu, total_t_cpu;
-	time_t start_t_user,end_t_user,total_t_user;
+	int r_max = 10; //le nombre de repetition du scenario pour faire une moyenne des temps de calcul
 
-	n=n+4;
-	int size = get_size_from_n(n); //correspondra a une grille de taille 16 si n=0
 
-	Slab *slab = create_Slab(size,n,256.0);
+	s+=4;
+	int size = get_size_from_n(s); //correspondra a une grille de taille 16 si s=0
+
+	Slab *slab = create_Slab(size,s,256.0);
 	set_values_center(slab);
 
 	
 
-	start_t_cpu = clock();
-	start_t_user = time(NULL);
+	clock_t start_t_cpu, end_t_cpu;
+	time_t start_t_user,end_t_user;
 
-	do_N_steps_iterative(slab,100);
+	double* cpu_times;
+	double* user_times;
 
-	end_t_cpu = clock();
-	end_t_user = time(NULL);
 
-	total_t_cpu = (double)(end_t_cpu - start_t_cpu) / CLOCKS_PER_SEC;
-	total_t_user = end_t_user - start_t_user;
+	if (a) {
+		printf("Initial temperatures");
+		print_quarter_Slab(slab);
+	}
+
+	if (m)
+		cpu_times = malloc(sizeof(double)*10);
+
+	if (M)
+		user_times = malloc(sizeof(double)*10);
 
 	
 
-	// print_Slab(slab);
-	printf("Total CPU time : %ld s\nTotal user time : %ld s\n",total_t_cpu,total_t_user);
+	for (int r=0;r<r_max;r++) {
+		if (m) 
+			start_t_cpu = clock();
+		if (M)
+			start_t_user = time(NULL);
+
+		do_N_steps_iterative(slab,i);
+
+		if (m) {
+			end_t_cpu = clock();
+			cpu_times[r] = (double)(end_t_cpu - start_t_cpu) / CLOCKS_PER_SEC;
+		}
+
+		if (m) {
+			end_t_user = time(NULL);
+			user_times[r] =  (double) end_t_user - start_t_user;
+
+		}
+
+	}
+
+
+
+	if (a) {
+		printf("Final temperatures");
+		print_quarter_Slab(slab);
+	}
+
+
+	if (m) {
+		remove_extreme_values(cpu_times,r_max);
+		double val;
+		compute_median_value(cpu_times,r_max-2,&val);
+		printf("Total CPU time per scenario (median): %lf s\n",val);
+		free(cpu_times);
+	}
+	
+	if (M) {
+		remove_extreme_values(user_times,r_max);
+		double val;
+		compute_median_value(user_times,r_max-2,&val);
+		printf("Total user time per scenario (median): %lf s\n",val);
+		free(user_times);
+	}
+
+	
 
 	struct rusage* use = malloc(sizeof(struct rusage));
 	getrusage(RUSAGE_SELF,use);

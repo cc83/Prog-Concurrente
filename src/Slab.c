@@ -27,6 +27,17 @@ void print_Slab(Slab* s) {
 	print_grid(s->grid,s->size,s->size);
 }
 
+void print_quarter_Slab(Slab* s){
+	printf("\n/****** Top left corner of the slab ******/\n");
+	for(int i = 0;i< s->size/2;i++) {
+		for(int j = 0;j< s->size/2;j++) {
+			printf("%'.1f ",s->grid[i*s->size+j]);
+		}
+		printf("\n");
+	}
+	printf("\n");
+}
+
 void set_values_center(Slab* m){
 	
 	int a = 1 << (m->n-1);
