@@ -90,39 +90,3 @@ void v_transfert(int l,int c,int size,float* prev_grid,float* new_grid){
 }
 
 
-void do_step_iterative(Slab* s,float* grid){
-	int size = s->size;
-
-	for (int i =0;i<size;i++) {
-		for (int j =0;j<size;j++) {
-			h_transfert(i,j,size,s->grid,grid);
-		}
-	}
-
-
-	clear_grid(s->grid,size);
-
-	for (int i =0;i<size;i++) {
-		for (int j =0;j<size;j++) {
-			v_transfert(i,j,size,grid,s->grid);
-		}
-	}
-
-
-	clear_grid(grid,size);
-
-	set_values_center(s);
-
-}
-
-void do_N_steps_iterative(Slab* s,int n) {
-
-	float* new_grid = create_grid(s->size,s->size);
-
-	for (int i = 0;i<n;i++) {
-		do_step_iterative(s,new_grid);
-	}
-
-	free(new_grid);
-
-}

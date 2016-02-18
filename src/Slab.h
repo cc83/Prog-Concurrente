@@ -26,8 +26,6 @@ void h_transfert(int l,int c,int size,float* prev_grid,float* new_grid);
 
 void v_transfert(int l,int c,int size,float* prev_grid,float* new_grid);
 
-void do_step_iterative(Slab* s,float* grid);
 
-void do_N_steps_iterative(Slab* s,int n);
 
 #endif

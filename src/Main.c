@@ -4,6 +4,7 @@
 
 #include "Grid.h"
 #include "Slab.h"
+#include "Tests.h"
 
 
 int get_size_from_n(int s){
@@ -33,87 +34,16 @@ void compute_median_value(double* tab,int size,double* val){
 	*val = (double) a/size;
 }
 
-int main(){
-	
-	//options du programme
-	int s = 0;
-	short m = 1;
-	short M = 1;
-	short a = 1;
-	int i = 1000;
-	short e = 0;
-	int t = 0;
-
-	int r_max = 10; //le nombre de repetition du scenario pour faire une moyenne des temps de calcul
 
 
-	s+=4;
-	int size = get_size_from_n(s); //correspondra a une grille de taille 16 si s=0
-
-
-	printf("/********** Program launched   ************/\n");
-
-
-	Slab *slab = create_Slab(size,s,256.0);
-	set_values_center(slab);
-
-	
-
-	clock_t start_t_cpu, end_t_cpu;
-	time_t start_t_user,end_t_user;
-
-	double* cpu_times;
-	double* user_times;
-
-
-	if (a) {
-		printf("Initial temperatures");
-		print_quarter_Slab(slab);
-	}
-
-	if (m)
-		cpu_times = malloc(sizeof(double)*10);
-
-	if (M)
-		user_times = malloc(sizeof(double)*10);
-
-	
-
-	for (int r=0;r<r_max;r++) {
-		if (m) 
-			start_t_cpu = clock();
-		if (M)
-			start_t_user = time(NULL);
-
-		do_N_steps_iterative(slab,i);
-
-		if (m) {
-			end_t_cpu = clock();
-			cpu_times[r] = (double)(end_t_cpu - start_t_cpu) / CLOCKS_PER_SEC;
-		}
-
-		if (m) {
-			end_t_user = time(NULL);
-			user_times[r] =  (double) end_t_user - start_t_user;
-
-		}
-
-	}
-
-
-
-	if (a) {
-		printf("Final temperatures");
-		print_quarter_Slab(slab);
-	}
-
-
+void print_time(int m,int M,double* cpu_times,double* user_times,int r_max) {
 	if (m) {
 		remove_extreme_values(cpu_times,r_max);
 		double val;
 		compute_median_value(cpu_times,r_max-2,&val);
 		printf("Total CPU time per scenario (median): %lf s\n",val);
 		free(cpu_times);
+	
 	}
 	
 	if (M) {
@@ -123,16 +53,106 @@ int main(){
 		printf("Total user time per scenario (median): %lf s\n",val);
 		free(user_times);
 	}
+}
+
+int main(){
+	
+	//options du programme
+	int s = 0;
+	short m = 0;
+	short M = 0;
+	short a = 0;
+	int i = 50000;
+	short e = 0;
+	int t = 0;	
+
+	void (*func)(Slab*,int,int); //la fonction correspondant au scenario voulu : iteratif, avec threads...
+
+
+
+	int r_max=1; //le nombre de repetition du scenario pour faire une moyenne des temps de calcul
+
+	if (m || M)
+		r_max = 10;
+
+	s+=4;
+	int size = get_size_from_n(s); //correspondra a une grille de taille 16 si s=0
+
+	Slab *slab = create_Slab(size,s,256.0);
+	set_values_center(slab);
+
+	
+	if (!e)
+		func = do_N_steps_iterative;
+
+
+	if (!(m) && !(M))
+		printf("/********** Program launched   ************/\n");
+
+
+	clock_t start_t_cpu, end_t_cpu;
+	time_t start_t_user,end_t_user;
+
+	double* cpu_times;
+	double* user_times;
+
+
+	if (a && !(m) && !(M)) {
+		printf("Initial temperatures");
+		print_quarter_Slab(slab);
+	}
 
 	
 
-	struct rusage* use = malloc(sizeof(struct rusage));
-	getrusage(RUSAGE_SELF,use);
-	printf("Maximum RAM used : %ld kB\n",use->ru_maxrss);
+	if (m)
+		cpu_times = malloc(sizeof(double)*10);
+
+	if (M)
+		user_times = malloc(sizeof(double)*10);
+
+
+	for (int r=0;r<r_max;r++) {
+		if (m) 
+			start_t_cpu = clock();
+		if (M)
+			start_t_user = time(NULL);
+
+		func(slab,i,t); //appel du scenario voulu selon le parametre -e
+
+		if (m) {
+			end_t_cpu = clock();
+			cpu_times[r] = (double)(end_t_cpu - start_t_cpu) / CLOCKS_PER_SEC;
+		}
+
+		if (M) {
+			end_t_user = time(NULL);
+			user_times[r] =  (double) end_t_user - start_t_user;
+
+		}
+
+	}
+
+
+
+	if (a && !(m) && !(M) ) {
+		printf("Final temperatures");
+		print_quarter_Slab(slab);
+	}
+
+
+	print_time(m,M,cpu_times,user_times,r_max); //affichage des temps CPU et utilisateur si demandés avec -m et -M et libere la memoire
+	
+	
+
+	
 
 	destroy_Slab(slab);
 	
-	
-	printf("/********** Program finished   ************/\n");
+	if (!(m) && !(M)) {
+		struct rusage* use = malloc(sizeof(struct rusage));
+		getrusage(RUSAGE_SELF,use);
+		printf("Maximum RAM used : %ld kB\n",use->ru_maxrss);
+		printf("/********** Program finished   ************/\n");
+	}
 
 }
